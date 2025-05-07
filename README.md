@@ -10,6 +10,7 @@
 - [Azureにてサービスプリンシパルを作成する](#サービスプリンシパルを作成する)
 - [作成したサービスプリンシパルのロールは以下を割り当てる](#サービスプリンシパルにロールを割り当てる)
   - `User Access Administrator`
+- [作成したサービスプリンシパルにAzure Key Vaultの権限を付与する](#作成したサービスプリンシパルにazure-key-vaultの権限を付与する)
 - [terraform.tfstate管理用のストレージを用意する](#terraformtfstate管理用のストレージを作成する)
 - [backend.tfにterraform.tfstateの情報を記載する](#backendtfにterraformtfstateの情報を記載する)
 - [Databricks Account IDを調べる](#databricks-account-idを調べる)
@@ -79,6 +80,9 @@ az role assignment create \
   "updatedOn": "2025-04-28T09:33:53.380103+00:00"
 }
 ```
+
+## 作成したサービスプリンシパルにAzure Key Vaultの権限を付与する
+詳細については、[GitHub Actions で Azure Key Vault を使用して Azure Spring Apps を認証する](https://learn.microsoft.com/ja-jp/azure/spring-apps/basic-standard/github-actions-key-vault)を参照すること。
 
 ## terraform.tfstate管理用のストレージを作成する
 tfstateはTerraformのデプロイ状態を管理するステートファイルになるので、厳重な管理が必要になる。<br>
@@ -218,3 +222,15 @@ terraform apply -destroy -auto-approve main.dev.destroy.tfplan
 ![002](./image/002.png)
 
 `削除`を押下すると削除できる。
+
+# CI/CDについて
+最後のCI/CDについて。<br>
+本リポジトリでは、`Github Actions`を採用している。<br>
+CI/CD管理用に`.github/workflows/`配下にymlファイルを用意しているので、適時参考にされたし。<br>
+[Actions](https://github.com/silverlining-yamashita/try-databricks-on-azure/actions)のページを参照されたし。
+
+## .github/workflows/terraform-dev-ci.ymlについて
+Pull Requestを作成した際に、tflintとtfsecにてチェックを行っている。
+
+## .github/workflows/terraform-dev-cd.ymlについて
+Pull RequestがMergeされると、デプロイワークフローを走らせている。
