@@ -14,6 +14,7 @@
 - [terraform.tfstate管理用のストレージを用意する](#terraformtfstate管理用のストレージを作成する)
 - [backend.tfにterraform.tfstateの情報を記載する](#backendtfにterraformtfstateの情報を記載する)
 - [Databricks Account IDを調べる](#databricks-account-idを調べる)
+- [Databricks Accountに作成したサービスプリンシパルを登録し、admin権限を付与する](#databricks-accountに作成したサービスプリンシパルを登録しadmin権限を付与する)
 - [devcontainer.envに環境変数を書き込む](#devcontainerenvに環境変数を書き込む)
 
 ## Azureにてサービスプリンシパルを作成する
@@ -110,6 +111,12 @@ terraform {
 https://accounts.azuredatabricks.net/ にアクセスし、`Databricks Account ID`を調べる。<br>
 以下のアカウントIDをコピーできる。
 ![001](./image/001.png)
+
+## Databricks Accountに作成したサービスプリンシパルを登録し、admin権限を付与する
+![003](./image/003.png)
+
+[Databricks Account](https://accounts.azuredatabricks.net/user-management/serviceprincipals)のページから、サービスプリンシパルを追加する。<br>
+追加したサービスプリンシパルにロール`アカウント管理者`の権限を付与する。
 
 ## devcontainer.envに環境変数を書き込む
 `devcontainer.env.template`に、以下の情報を記載し、ファイル名を`devcontainer.env`に変更する。
