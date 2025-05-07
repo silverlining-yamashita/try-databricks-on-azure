@@ -1,0 +1,13 @@
+{
+  "recommendations": [
+    "bierner.markdown-mermaid",
+    "bpruitt-goddard.mermaid-markdown-syntax-highlighting",
+    "vscode-icons-team.vscode-icons",
+    "irongeek.vscode-env",
+    "ms-vscode-remote.remote-containers",
+    "hashicorp.terraform",
+    "gxl.git-graph-3",
+    "fabiospampinato.vscode-diff",
+    "mohsen1.prettify-json"
+  ]
+}

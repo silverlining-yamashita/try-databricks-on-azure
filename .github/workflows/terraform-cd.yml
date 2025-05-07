@@ -1,0 +1,54 @@
+name: Docker Image CD
+
+on:
+  push:
+    branches: [ "dev" ]
+
+jobs:
+
+  docker-build-and-deploy:
+
+    runs-on: ubuntu-latest
+    env:
+      HOME: /home/runner
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: Azure/login@v2.3.0
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Fetch secrets from Azure Key Vault
+        uses: azure/get-keyvault-secrets@v1
+        with:
+          keyvault: slv-keyvault-dev
+          secrets: 'arm-client-id, arm-client-secret, arm-subscription-id, arm-tenant-id, databricks-account-id'
+        id: getsecrets
+            
+      - name: Build the Docker image
+        run: docker build . --file .devcontainer/Dockerfile --tag terraform-cd:${{ github.run_number }}
+
+      - name: Run Docker container for terraform + tflint + tfsec
+        run: |
+          docker run --rm \
+            --env HOME=$HOME \
+            --env ARM_CLIENT_ID="${{ steps.getsecrets.outputs.arm-client-id }}" \
+            --env ARM_CLIENT_SECRET="${{ steps.getsecrets.outputs.arm-client-secret }}" \
+            --env ARM_SUBSCRIPTION_ID="${{ steps.getsecrets.outputs.arm-subscription-id }}" \
+            --env ARM_TENANT_ID="${{ steps.getsecrets.outputs.arm-tenant-id }}" \
+            --env DATABRICKS_ACCOUNT_ID="${{ steps.getsecrets.outputs.databricks-account-id }}" \
+            --env TF_VAR_ARM_CLIENT_ID="${{ steps.getsecrets.outputs.arm-client-id }}" \
+            --env TF_VAR_ARM_CLIENT_SECRET="${{ steps.getsecrets.outputs.arm-client-secret }}" \
+            --env TF_VAR_ARM_SUBSCRIPTION_ID="${{ steps.getsecrets.outputs.arm-subscription-id }}" \
+            --env TF_VAR_ARM_TENANT_ID="${{ steps.getsecrets.outputs.arm-tenant-id }}" \
+            --env TF_VAR_DATABRICKS_ACCOUNT_ID="${{ steps.getsecrets.outputs.databricks-account-id }}" \
+            -v ${{ github.workspace }}:/workspace \
+            --workdir /workspace \
+            terraform-cd:${{ github.run_number }} \
+            /bin/bash -c "
+              chmod +x .devcontainer/init.sh &&
+              .devcontainer/init.sh 1.11.3 &&
+              tflint &&
+              tfsec"

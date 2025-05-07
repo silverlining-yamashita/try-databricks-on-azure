@@ -1,0 +1,12 @@
+# root
+.DS_Store
+*.env
+.terraform
+.terraform.lock.hcl
+*terraform.tfstate*
+*tfplan
+plan*json
+*tfstate
+backend.tf
+
+.bk

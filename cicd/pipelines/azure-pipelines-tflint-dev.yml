@@ -1,0 +1,78 @@
+# Docker
+# Build a Docker image
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger: none
+
+resources:
+- repo: self
+
+variables:
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: build_and_tflint_tfsec
+  displayName: Build & Tflint Tfsec
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: AzureKeyVault@2
+      name: get_azure_keyvault_secret
+      displayName: Get Azure Keyvault Sercret
+      inputs:
+        azureSubscription: 'slv-terraform-sp-$(env)-connection-2'
+        KeyVaultName: 'slv-keyvault-$(env)'
+        SecretsFilter: 'arm-client-id, arm-client-secret, arm-subscription-id, arm-tenant-id, databricks-account-id'
+        RunAsPreJob: true
+    - task: Bash@3
+      name: build_an_image
+      displayName: Build an image
+      inputs:
+        targetType: 'inline'
+        script: 'docker build -f $(Build.SourcesDirectory)/.devcontainer/Dockerfile -t terraform:latest .'
+    - task: Bash@3
+      displayName: 'Set executable permission on init.sh'
+      inputs:
+        targetType: 'inline'
+        script: |
+          chmod +x .devcontainer/init.sh
+    - task: Bash@3
+      name: docker_run_terraform_tflint_tfsec
+      displayName: Docker run terraform tflint tfsec
+      env:
+        ARM_CLIENT_ID: $(arm-client-id)
+        ARM_CLIENT_SECRET: $(arm-client-secret)
+        ARM_SUBSCRIPTION_ID: $(arm-subscription-id)
+        ARM_TENANT_ID: $(arm-tenant-id)
+        DATABRICKS_ACCOUNT_ID: $(databricks-account-id)
+        TF_VAR_ARM_CLIENT_ID: $(arm-client-id)
+        TF_VAR_ARM_CLIENT_SECRET: $(arm-client-secret)
+        TF_VAR_ARM_SUBSCRIPTION_ID: $(arm-subscription-id)
+        TF_VAR_ARM_TENANT_ID: $(arm-tenant-id)
+        TF_VAR_DATABRICKS_ACCOUNT_ID: $(databricks-account-id)
+      inputs:
+        targetType: 'inline'
+        script: |
+          docker run --rm \
+            --env HOME=/home/vsts \
+            --env ARM_CLIENT_ID=$ARM_CLIENT_ID \
+            --env ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET \
+            --env ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID \
+            --env ARM_TENANT_ID=$ARM_TENANT_ID \
+            --env DATABRICKS_ACCOUNT_ID=$DATABRICKS_ACCOUNT_ID \
+            --env TF_VAR_ARM_CLIENT_ID=$TF_VAR_ARM_CLIENT_ID \
+            --env TF_VAR_ARM_CLIENT_SECRET=$TF_VAR_ARM_CLIENT_SECRET \
+            --env TF_VAR_ARM_SUBSCRIPTION_ID=$TF_VAR_ARM_SUBSCRIPTION_ID \
+            --env TF_VAR_ARM_TENANT_ID=$TF_VAR_ARM_TENANT_ID \
+            --env TF_VAR_DATABRICKS_ACCOUNT_ID=$TF_VAR_DATABRICKS_ACCOUNT_ID \
+            -v $(System.DefaultWorkingDirectory):/workspace \
+            --name slv-terraform-project-$(Build.BuildId) \
+            terraform:latest \
+            /bin/bash -c "
+              cd /workspace &&
+              .devcontainer/init.sh 1.11.3 &&
+              tflint
+              tfsec"

@@ -1,0 +1,38 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/docker-in-docker
+{
+	"name": "Docker in Docker",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+
+	"runArgs"         : ["--env-file", ".devcontainer/devcontainer.env"],
+	"workspaceFolder" : "/workspace",
+	"workspaceMount"  : "source=${localWorkspaceFolder},target=/workspace,type=bind",
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "/bin/bash .devcontainer/init.sh 1.11.3",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"bierner.markdown-mermaid",
+				"bpruitt-goddard.mermaid-markdown-syntax-highlighting",
+				"vscode-icons-team.vscode-icons",
+				"irongeek.vscode-env",
+				"ms-vscode-remote.remote-containers",
+				"hashicorp.terraform",
+				"gxl.git-graph-3",
+				"fabiospampinato.vscode-diff",
+				"mohsen1.prettify-json"
+			]
+		}
+	},
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	"remoteUser": "vscode"
+}
