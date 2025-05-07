@@ -23,6 +23,7 @@ az login
 ```
 
 ### サービスプリンシパルを作成する
+詳細については、[GitHub Actions で Azure Key Vault を使用して Azure Spring Apps を認証する](https://learn.microsoft.com/ja-jp/azure/spring-apps/basic-standard/github-actions-key-vault)を参照すること。<br>
 ※[az ad sp create-for-rbac](https://learn.microsoft.com/ja-jp/cli/azure/ad/sp?view=azure-cli-latest#az-ad-sp-create-for-rbac)を参照<br>
 サービスプリンシパルのロールは`Contributor`で作成する。
 ```bash
@@ -30,15 +31,22 @@ az ad sp create-for-rbac \
   -n {service_principal_name} \
   --role Contributor \
   --scopes /subscriptions/{subscription_id}
+  --json-auth
 ```
 
 #### 作成結果
 ```json
 {
-  "appId": "{app_id}",
-  "displayName": "{service_principal_name}",
-  "password": "******************************",
-  "tenant": "{tenant_id}"
+  "clientId": "{cliend_id}",
+  "clientSecret": "{client_secret}",
+  "subscriptionId": "{subscription_id}",
+  "tenantId": "{tenant_id}",
+  "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+  "resourceManagerEndpointUrl": "https://management.azure.com/",
+  "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+  "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+  "galleryEndpointUrl": "https://gallery.azure.com/",
+  "managementEndpointUrl": "https://management.core.windows.net/"
 }
 ```
 
@@ -48,7 +56,7 @@ az ad sp create-for-rbac \
 az role assignment create \
   --role "User Access Administrator" \
   --scope /subscriptions/{subscription_id} \
-  --assignee {app_id}
+  --assignee {cliend_id}
 ```
 
 #### 割り当て結果
@@ -60,11 +68,11 @@ az role assignment create \
   "createdOn": "2025-04-28T09:33:53.155099+00:00",
   "delegatedManagedIdentityResourceId": null,
   "description": null,
-  "id": "/subscriptions/{subscription_id}/providers/Microsoft.Authorization/roleAssignments/5a660bda-c507-47ef-b6fe-70981cb650dc",
-  "name": "5a660bda-c507-47ef-b6fe-70981cb650dc",
+  "id": "/subscriptions/{subscription_id}/providers/Microsoft.Authorization/roleAssignments/{hoge}",
+  "name": "{hoge}",
   "principalId": "{object_id}",
   "principalType": "ServicePrincipal",
-  "roleDefinitionId": "/subscriptions/{subscription_id}/providers/Microsoft.Authorization/roleDefinitions/18d7d88d-d35e-4fb5-a5c3-7773c20a72d9",
+  "roleDefinitionId": "/subscriptions/{subscription_id}/providers/Microsoft.Authorization/roleDefinitions/{fuga}",
   "scope": "/subscriptions/{subscription_id}",
   "type": "Microsoft.Authorization/roleAssignments",
   "updatedBy": "{myself_object_id}",
@@ -121,16 +129,16 @@ TF_VAR_DATABRICKS_ACCOUNT_ID={databricks_account_id}
 ```
 .
 ├── README.md                              # 本ファイル
-├── backend.tf                             # バックエンド管理用tfファイル
-├── cicd                                   # CI/CD管理用のディレクトリ
-│   └── pipelines
-│       └── azure-pipelines-tflint-dev.yml # CI用のymlファイル PR作成時にtflintとtfsecでチェックを行う
+├── .github/workflows                      # CI/CD管理用のディレクトリ
+├── backend.tf                             # バックエンド管理用tfファイルェックを行う
 ├── env_dev.tfvars                         # 環境ごとに変更するためのtfvarsファイル
 ├── main.tf                                # メインの処理
 ├── outputs.tf                             # アウトプットを管理
 ├── providers.tf                           # プロバイダを管理
 └── variables.tf                           # 変数を管理
 ```
+
+※`cicd/pipelines/azure*.yml`については、Azure Pipelines用のファイルなので、ここでは説明を割愛する。
 
 # Terraformを実行し、Databricks環境を作成する
 Terraformを実行し、Databricks環境を作成する。<br>
