@@ -6,7 +6,7 @@ on:
 
 jobs:
 
-  docker-build-and-deploy:
+  docker-cd:
 
     runs-on: ubuntu-latest
     env:
@@ -23,7 +23,7 @@ jobs:
       - name: Fetch secrets from Azure Key Vault
         uses: azure/get-keyvault-secrets@v1
         with:
-          keyvault: slv-keyvault-dev
+          keyvault: slv-keyvault-dev-github
           secrets: 'arm-client-id, arm-client-secret, arm-subscription-id, arm-tenant-id, databricks-account-id'
         id: getsecrets
             
