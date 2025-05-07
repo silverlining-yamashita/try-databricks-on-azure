@@ -50,5 +50,6 @@ jobs:
             /bin/bash -c "
               chmod +x .devcontainer/init.sh &&
               .devcontainer/init.sh 1.11.3 &&
-              tflint &&
-              tfsec"
+              terraform init -upgrade &&
+              terraform plan -var-file=env_dev.tfvars -out main.dev.tfplan &&
+              terraform apply -auto-approve main.dev.tfplan"
