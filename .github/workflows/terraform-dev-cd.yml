@@ -1,12 +1,12 @@
-name: Docker Image CI
+name: Docker Image CD
 
 on:
-  pull_request:
-    branches: [ "dev" ]
+  push:
+    branches: [ "develop" ]
 
 jobs:
 
-  docker-build-and-deploy:
+  docker-cd:
 
     runs-on: ubuntu-latest
     env:
@@ -23,7 +23,7 @@ jobs:
       - name: Fetch secrets from Azure Key Vault
         uses: azure/get-keyvault-secrets@v1
         with:
-          keyvault: slv-keyvault-dev
+          keyvault: slv-keyvault-dev-github
           secrets: 'arm-client-id, arm-client-secret, arm-subscription-id, arm-tenant-id, databricks-account-id'
         id: getsecrets
             
@@ -50,5 +50,6 @@ jobs:
             /bin/bash -c "
               chmod +x .devcontainer/init.sh &&
               .devcontainer/init.sh 1.11.3 &&
-              tflint &&
-              tfsec"
+              terraform init -upgrade &&
+              terraform plan -var-file=env_dev.tfvars -out main.dev.tfplan &&
+              terraform apply -auto-approve main.dev.tfplan"

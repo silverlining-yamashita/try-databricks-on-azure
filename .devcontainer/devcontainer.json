@@ -28,7 +28,8 @@
 				"hashicorp.terraform",
 				"gxl.git-graph-3",
 				"fabiospampinato.vscode-diff",
-				"mohsen1.prettify-json"
+				"mohsen1.prettify-json",
+				"github.vscode-github-actions"
 			]
 		}
 	},
