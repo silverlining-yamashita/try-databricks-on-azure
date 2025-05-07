@@ -89,7 +89,7 @@ tfstate用のストレージのアクセス権限に関しては、最新の注�
 tfstateを保存する設定を`backend.tf`に記載する。<br>
 記入例は以下を参照する。<br>
 ※`backend.tf`を用意しないと、tfstateファイルがローカルに保存されるので注意が必要。<br>
-※`backend.tf.template`を参考にすること。<br>
+※`backend.tf`の内容を適時修正すること。<br>
 ※tfstateファイルにはセキュアな文字情報も記載されるので最新の注意を払って運用すること。
 ```tf
 terraform {
